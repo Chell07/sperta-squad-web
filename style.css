@@ -1,9 +1,13 @@
+/* RESET DASAR 
+   Biar tampilan konsisten di semua browser
+*/
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* SETTINGAN BODY & GLOBAL */
 body {
   margin: 0;
   padding: 0;
@@ -11,53 +15,45 @@ body {
   overflow-x: hidden;
   background-color: #ffffff;
   transition: background-color 0.3s ease, color 0.3s ease;
+  /* PENTING: Jangan hapus relative ini, biar efek natal posisinya pas */
+  position: relative;
 }
 
 /* =========================================
-   UPDATED: HEADER MELAYANG (FLOATING)
+   HEADER MELAYANG (FLOATING)
+   Biar menu tetep di atas pas discroll
    ========================================= */
 header {
   position: fixed;
-  top: 20px; /* Jarak dari atas agar melayang */
+  top: 20px;
   left: 0;
   width: 100%;
-  z-index: 1000;
-  background: transparent; /* Transparan, tidak ada background panjang */
+  z-index: 1000; /* Pastiin ini di atas salju */
+  background: transparent;
   border: none !important;
   margin: 0 !important;
   padding: 0 !important;
   
-  /* Flexbox untuk menengahkan menu */
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  
-  /* PENTING: Agar area kosong di kiri/kanan menu bisa ditembus klik */
   pointer-events: none; 
 }
 
-/* Container List Menu (Kapsul Tengah) */
+/* Container List Menu */
 .header-list { margin: 0; padding: 0; }
 .div-list { display:flex; align-items:center; justify-content:center; padding:0; }
 
 .ul-list {
-  /* Aktifkan klik kembali untuk tombol menu */
   pointer-events: auto; 
-  
   list-style: none;
   display: flex;
   gap: 2rem;
-  
-  /* Glassmorphism / Efek Kaca */
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.85); /* Agak transparan dikit */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  
-  /* Shadow & Border halus */
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  
-  /* Bentuk Kapsul */
   padding: 12px 35px;
   border-radius: 50px;
   margin: 0;
@@ -80,6 +76,7 @@ header {
   transition: color 0.3s ease;
 }
 
+/* Style pas menu aktif */
 .ul-list li.active {
   background-color: black;
   box-shadow: 0 4px 10px rgba(0,0,0,0.2);
@@ -98,19 +95,15 @@ header {
   background-color: #333;
 }
 
-/* Icon Admin Melayang (Pojok Kanan) */
+/* Icon Admin (Pojok Kanan Atas) */
 .admin-icon-container {
-  /* Aktifkan klik */
   pointer-events: auto; 
-  
-  position: fixed; /* Fixed agar tetap di pojok layar */
-  top: 20px;       /* Samakan dengan header top */
-  right: 40px;     /* Jarak dari kanan */
+  position: fixed;
+  top: 20px;
+  right: 40px;
   display: flex;
   gap: 15px;
   z-index: 1001;
-  
-  /* Style Kapsul Kecil */
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -136,11 +129,15 @@ header {
 }
 
 /* =========================================
-   END HEADER CHANGES
+   FIX LAYER TUMPUKAN (Z-INDEX)
+   Konten utama harus nongol di atas bintang/salju
    ========================================= */
+section, .home, .about, .team, .anonymous {
+  position: relative;
+  z-index: 5; /* Di atas layer salju (0) */
+}
 
-
-/* Home */
+/* Bagian Home */
 .home { margin:160px 200px; padding-top:40px; margin-top:0; }
 .home-container { display:flex; gap:6rem; align-items:center; }
 
@@ -236,9 +233,16 @@ hr {
   color: #474af0;
 }
 
-.home img { width:400px; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,0.2); }
+.home img { 
+    width:400px; 
+    border-radius:10px; 
+    box-shadow:0 10px 30px rgba(0,0,0,0.2); 
+    position: relative;
+    z-index: 6; 
+    background: #fff;
+}
 
-/* About */
+/* Bagian About */
 .about { margin:160px 200px; }
 
 .about p {
@@ -293,7 +297,7 @@ hr {
   color: #1e40af;
 }
 
-/* Video Container Styles */
+/* Container Video di About */
 .video-container {
   position: relative;
   width: 225px;
@@ -305,6 +309,7 @@ hr {
   cursor: pointer;
   background: #000;
   transition: all 0.3s ease;
+  z-index: 6;
 }
 
 .about-video {
@@ -315,6 +320,7 @@ hr {
   transition: transform 0.3s ease;
 }
 
+/* Overlay tombol play/mute */
 .video-overlay {
   position: absolute;
   bottom: 15px;
@@ -345,7 +351,7 @@ hr {
   transform: scale(1.05);
 }
 
-/* Video Popup Styles */
+/* Popup Video (Zoom) */
 .video-popup {
   position: fixed;
   top: 0;
@@ -410,7 +416,7 @@ hr {
   transform: scale(1.1);
 }
 
-/* Team */
+/* Bagian Team */
 .team { margin:160px 200px; display:flex; align-items:center; justify-content:center; flex-direction:column; }
 
 .team p {
@@ -462,8 +468,24 @@ hr {
 
 .team-member-scroll { display:flex; gap:40px; padding:20px; min-width:min-content; }
 
-/* Member cards */
-.member-card-simple { flex:0 0 450px; background:#fff; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1); overflow:hidden; cursor:pointer; display:flex; flex-direction:column; align-items:center; border: 1px solid #f0f0f0; transition: all 0.3s ease; text-align: center; }
+/* Kartu Anggota Tim */
+.member-card-simple { 
+    flex:0 0 450px; 
+    background:#fff; 
+    border-radius:20px; 
+    box-shadow:0 10px 30px rgba(0,0,0,0.1); 
+    overflow:hidden; 
+    cursor:pointer; 
+    display:flex; 
+    flex-direction:column; 
+    align-items:center; 
+    border: 1px solid #f0f0f0; 
+    transition: all 0.3s ease; 
+    text-align: center;
+    position: relative;
+    z-index: 6; /* Ini juga di atas bintang */
+}
+
 .member-card-simple:hover {
   transform: translateY(-10px) scale(1.05);
   box-shadow: 0 20px 40px rgba(0,0,0,0.15);
@@ -498,7 +520,7 @@ hr {
   }
 }
 
-/* Image Viewer Popup */
+/* Popup Lihat Gambar (Viewer) */
 .image-viewer {
   position: fixed;
   top: 0;
@@ -566,6 +588,7 @@ hr {
   transform: scale(1.1);
 }
 
+/* Tombol navigasi prev/next di viewer */
 .viewer-nav {
   position: absolute;
   top: 50%;
@@ -612,7 +635,17 @@ hr {
 
 
 /* Footer */
-.footer { background:#000; color:#fff; padding:40px 20px; text-align:center; overflow-x: hidden; transition: background-color 0.3s ease; }
+.footer { 
+    background:#000; 
+    color:#fff; 
+    padding:40px 20px; 
+    text-align:center; 
+    overflow-x: hidden; 
+    transition: background-color 0.3s ease;
+    /* Footer harus di atas bintang */
+    position: relative;
+    z-index: 5;
+}
 
 .footer-container {
   max-width: 1200px;
@@ -669,7 +702,7 @@ hr {
   color: #aaa;
 }
 
-/* Loading */
+/* Screen Loading awal buka web */
 #loading-screen { position:fixed; top:0; left:0; width:100%; height:100%; background:#000; display:flex; justify-content:center; align-items:center; z-index:9999; color:#fff; text-align:center; flex-direction:column; overflow:hidden; }
 
 .hidden {
@@ -708,7 +741,7 @@ hr {
   margin-bottom: 20px;
 }
 
-/* Custom Logo Styles */
+/* Custom Logo */
 .custom-logo {
   width: 150px;
   height: 150px;
@@ -726,11 +759,11 @@ hr {
   opacity:1;
 }
 
-/* Cursor blink for typing */
+/* Animasi cursor kedip pas ngetik */
 .cursor { animation: blink 1s infinite; }
 @keyframes blink { 0%,100%{opacity:1;}50%{opacity:0;} }
 
-/* Dark/Light Mode Toggle */
+/* Tombol Ganti Tema (Dark/Light) */
 .theme-toggle {
   position: fixed;
   bottom: 20px;
@@ -756,13 +789,15 @@ hr {
   transform: scale(1.1);
 }
 
-/* Dark Mode Styles */
+/* SETTINGAN DARK MODE
+   Biar mata gak sakit kalo malem
+*/
 body.dark-mode {
   background-color: #120f12;
   color: #e0e0e0;
 }
 
-/* UPDATE DARK MODE HEADER */
+/* Update Header di Dark Mode */
 body.dark-mode header {
   background: transparent;
   border-bottom: none;
@@ -787,7 +822,7 @@ body.dark-mode .ul-list li.active {
   background-color: #474af0;
 }
 
-/* UPDATE DARK MODE ADMIN ICON */
+/* Update Icon Admin di Dark Mode */
 body.dark-mode .admin-icon-container {
   background-color: rgba(30, 30, 30, 0.85);
   border: 1px solid rgba(255,255,255,0.1);
@@ -802,7 +837,7 @@ body.dark-mode .admin-icon:hover {
   color: #fff;
   background-color: rgba(255, 255, 255, 0.1);
 }
-/* END DARK MODE UPDATES */
+/* Selesai update dark mode */
 
 body.dark-mode .home-p {
   color: #e0e0e0;
@@ -855,7 +890,7 @@ body.dark-mode .theme-toggle {
   color: #e0e0e0;
 }
 
-/* Dark mode untuk video */
+/* Dark mode khusus video container */
 body.dark-mode .video-container {
   border: 1px solid #333;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
@@ -865,7 +900,7 @@ body.dark-mode .about-video {
   border: 1px solid #444;
 }
 
-/* Back to top button */
+/* Tombol balik ke atas */
 #back-to-top {
   position: fixed;
   bottom: 80px;
@@ -889,7 +924,7 @@ body.dark-mode .about-video {
   background: #2c36d9;
 }
 
-/* Animations */
+/* Animasi Muncul (Reveal) */
 .reveal {
   opacity: 0;
   transform: translateY(40px);
@@ -919,7 +954,11 @@ body.dark-mode .about-video {
   transform: translateX(0);
 }
 
-/* Responsive Design for Video */
+/* RESPONSIVE DESIGN 
+   Buat ngepasin tampilan di Tablet/HP
+*/
+
+/* Ukuran video di layar kecil */
 @media (max-width: 1024px) {
   .video-container {
     width: 200px;
@@ -979,7 +1018,7 @@ body.dark-mode .about-video {
   }
 }
 
-/* Responsive Design */
+/* Layout umum responsive */
 @media (max-width: 1200px) {
   .home, .about, .team {
     margin: 120px 100px;
@@ -991,6 +1030,7 @@ body.dark-mode .about-video {
     margin: 120px 50px;
   }
 
+  /* Jadiin layout numpuk ke bawah kalo layar sempit */
   .home-container, .about-container {
     flex-direction: column;
     gap: 3rem;
@@ -1033,7 +1073,7 @@ body.dark-mode .about-video {
 
 @media (max-width: 768px) {
   header {
-    display: none; /* Hide header on mobile as per original design */
+    display: none; /* Hide header di HP sesuai desain awal */
   }
 
   .home, .about, .team {
@@ -1157,7 +1197,7 @@ body.dark-mode .about-video {
   }
 }
 
-/* Additional utility classes */
+/* Helper Class */
 .text-center { text-align:center; }
 .flex { display:flex; }
 .flex-column { flex-direction:column; }
@@ -1166,18 +1206,18 @@ body.dark-mode .about-video {
 .w-full { width:100%; }
 .h-full { height:100%; }
 
-/* Smooth transitions for all interactive elements */
+/* Transisi halus buat semua elemen interaktif */
 button, a, .video-container, .member-card-simple {
   transition: all 0.3s ease;
 }
 
-/* Focus styles for accessibility */
+/* Fokus pas navigasi pake tab */
 button:focus, a:focus {
   outline: 2px solid #474af0;
   outline-offset: 2px;
 }
 
-/* Selection color */
+/* Warna blok teks pas diselect */
 ::selection {
   background: #474af0;
   color: white;
@@ -1188,7 +1228,9 @@ button:focus, a:focus {
   color: white;
 }
 
-/* ------------------ MODERN MUSIC PLAYER STYLES (LEFT BOTTOM + THEME AWARE) ------------------ */
+/* ------------------ MUSIC PLAYER MODERN ------------------ 
+   Posisinya di pojok kiri bawah, ngikutin tema (terang/gelap)
+*/
 :root {
   --primary: #474af0;
   --accent: #9b5cf6;
@@ -1219,6 +1261,7 @@ button:focus, a:focus {
               padding-top 0.4s ease, padding-bottom 0.4s ease;
 }
 
+/* Animasi header player */
 .modern-header {
   transition: opacity 0.3s ease, max-height 0.4s ease, 
               margin-bottom 0.4s ease, visibility 0.3s ease;
@@ -1237,6 +1280,7 @@ button:focus, a:focus {
   visibility: visible;
 }
 
+/* Pas diminimize */
 .modern-music-player.minimized {
   padding-bottom: 0;
 }
@@ -1270,7 +1314,7 @@ button:focus, a:focus {
   transition: background 0.25s ease;
 }
 
-/* header and meta */
+/* header info lagu */
 .modern-header { display:flex; gap:12px; align-items:center; margin-bottom:8px; }
 .modern-album { width:64px; height:64px; border-radius:8px; object-fit:cover; box-shadow:0 8px 30px rgba(0,0,0,0.12); }
 .modern-meta { flex:1; display:flex; flex-direction:column; gap:4px; min-width: 0; }
@@ -1278,7 +1322,7 @@ button:focus, a:focus {
 .modern-artist { font-size:13px; color:var(--muted); }
 .modern-lyrics { font-size:12px; color:rgba(0,0,0,0.75); max-height:42px; overflow:hidden; white-space:pre-line; }
 
-/* controls */
+/* tombol kontrol */
 .modern-controls { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
 .modern-buttons { display:flex; gap:12px; align-items:center; justify-content:center; }
 .modern-btn { background:none; border:none; cursor:pointer; font-size:16px; padding:8px; color:var(--primary); }
@@ -1289,7 +1333,9 @@ button:focus, a:focus {
 
 .modern-time { display:flex; justify-content:space-between; font-size:12px; color:var(--muted); }
 
-/* theme-aware dark mode: when body has dark-mode class, switch variables */
+/* WARNA PLAYER DI DARK MODE 
+   Ganti variabel biar cocok sama tema gelap 
+*/
 body.dark-mode {
   --card-bg: rgba(20,18,20,0.86);
   --card-text: #e6e6e6;
@@ -1299,7 +1345,7 @@ body.dark-mode {
   --accent: #c09bff;
 }
 
-/* ensure buttons adapt in dark mode */
+/* pastiin tombol tetep keliatan */
 body.dark-mode .modern-play { box-shadow: 0 10px 24px rgba(124,132,255,0.14); }
 body.dark-mode .modern-btn { color: var(--primary); }
 body.dark-mode .modern-artist { color: var(--muted); } 
@@ -1331,7 +1377,7 @@ body.dark-mode .modern-progress-container { background: rgba(255,255,255,0.08); 
   }
 }
 
-/* FITUR ANONIM */
+/* FITUR PESAN ANONIM */
 
 .anonymous {
   margin:160px 200px; 
@@ -1398,6 +1444,8 @@ body.dark-mode .modern-progress-container { background: rgba(255,255,255,0.08); 
   resize: vertical;
   transition: all 0.3s ease;
   background-color: #f9f9f9;
+  position: relative;
+  z-index: 5;
 }
 
 #anon-message-input:focus {
@@ -1461,6 +1509,8 @@ body.dark-mode .modern-progress-container { background: rgba(255,255,255,0.08); 
   padding: 10px;
   background-color: #fafafa;
   transition: all 0.3s ease;
+  position: relative;
+  z-index: 5;
 }
 
 .anon-message-loading {
@@ -1584,7 +1634,7 @@ body.dark-mode .anon-message-card span {
   color: #888;
 }
 
-/* Responsive untuk Fitur Anonim */
+/* Responsive buat Fitur Anonim */
 @media (max-width: 1024px) {
   .anonymous {
     margin: 120px 50px;
@@ -1607,7 +1657,7 @@ body.dark-mode .anon-message-card span {
   }
 }
 
-/* Tombol Hapus pada Kartu Pesan */
+/* Tombol Hapus Pesan (Khusus Admin) */
 .anon-message-card {
   position: relative; 
 }
@@ -1642,7 +1692,7 @@ body.dark-mode .anon-message-card span {
   transform: scale(1.1);
 }
 
-/* Dark Mode untuk Tombol Hapus */
+/* Dark Mode tombol hapus */
 body.dark-mode .admin-delete-btn {
   background: #3a1e1e;
   color: #ff8a80;
@@ -1652,4 +1702,238 @@ body.dark-mode .admin-delete-btn {
 body.dark-mode .admin-delete-btn:hover {
   background: #d93025;
   color: white;
+}
+
+/* =========================================
+   EFEK SPECIAL NATAL + POPUP
+   ========================================= */
+
+/* Wadah Utama Efek Natal */
+#christmas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0; 
+    overflow: hidden;
+}
+
+/* --- 1. SALJU TURUN (SNOWFLAKES) --- */
+.snowflake {
+    position: absolute;
+    top: -20px;
+    font-size: 1.2rem;
+    /* Ganti nama animasi biar gak bentrok */
+    animation: snowfall linear infinite;
+    
+    /* Light Mode: Biru kalem biar keliatan */
+    color: #4682B4; 
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); 
+    opacity: 0.9;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+/* Dark Mode: Salju jadi putih glowing */
+body.dark-mode .snowflake {
+    color: white;
+    text-shadow: 0 0 5px rgba(255,255,255,0.4);
+    opacity: 0.8;
+}
+
+@keyframes snowfall {
+    0% {
+        transform: translateY(-20px) translateX(0) rotate(0deg);
+    }
+    100% {
+        transform: translateY(110vh) translateX(20px) rotate(360deg);
+    }
+}
+
+/* --- 2. BINTANG KELAP KELIP --- */
+.christmas-star {
+    position: absolute;
+    font-size: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 1s ease-in-out, transform 1s ease-in-out, color 0.3s ease;
+
+    /* Light Mode: Emas agak gelap */
+    color: #DAA520; 
+    filter: drop-shadow(0 0 1px rgba(0,0,0,0.2));
+}
+
+/* Dark Mode: Kuning Neon */
+body.dark-mode .christmas-star {
+    color: #ffd700;
+    filter: drop-shadow(0 0 5px #ffd700);
+}
+
+.christmas-star.visible {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* --- 3. WIDGET POHON NATAL (POJOK KANAN BAWAH) --- */
+.christmas-tree-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 80px; 
+    font-size: 50px;
+    z-index: 2000;
+    cursor: pointer;
+    pointer-events: auto;
+    filter: drop-shadow(0 5px 15px rgba(0,0,0,0.2));
+    animation: sway 3s ease-in-out infinite;
+    transform-origin: bottom center;
+    transition: transform 0.3s;
+}
+
+.christmas-tree-widget:hover {
+    animation-play-state: paused;
+    transform: scale(1.1);
+}
+
+@keyframes sway {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg); }
+}
+
+@media (max-width: 768px) {
+    .christmas-tree-widget {
+        right: 70px;
+        bottom: 15px;
+        font-size: 40px;
+    }
+}
+
+/* --- 4. POPUP UCAPAN NATAL --- */
+.christmas-popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 3000; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s ease;
+}
+
+.christmas-popup-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.christmas-popup-container {
+    position: relative;
+    width: 85%;
+    max-width: 380px; /* Dikecilin biar minimalis */
+    transform: scale(0.8);
+    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.christmas-popup-overlay.active .christmas-popup-container {
+    transform: scale(1);
+}
+
+.christmas-message-box {
+    background: #ffffff;
+    border: 2px solid #333; /* Border tipis */
+    border-radius: 15px;
+    padding: 30px 20px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    position: relative;
+    font-family: 'Playfair Display', serif;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Mode Gelap Popup */
+body.dark-mode .christmas-message-box {
+    background: #1e1e1e;
+    border-color: #f0f0f0;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.christmas-message-box h2 {
+    color: #c0392b;
+    font-size: 24px;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.christmas-message-box p {
+    color: #333;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    font-family: 'Montserrat', sans-serif;
+    transition: color 0.3s ease;
+}
+
+body.dark-mode .christmas-message-box p {
+    color: #e0e0e0;
+}
+
+.christmas-message-box .from-text {
+    font-weight: bold;
+    color: #27ae60;
+    margin-top: 20px;
+    font-size: 13px;
+    font-style: italic;
+}
+
+.close-xmas-btn {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close-xmas-btn:hover {
+    color: #c0392b;
+}
+
+/* Dekorasi Popup (Otomatis ganti warna) */
+.xmas-deco {
+    position: absolute;
+    width: 50px;
+    height: auto;
+    z-index: 2;
+    transition: filter 0.3s ease;
+    
+    /* Light Mode: Paksa item jadi HITAM */
+    filter: brightness(0); 
+}
+
+/* Dark Mode: Paksa item jadi PUTIH */
+body.dark-mode .xmas-deco {
+    filter: brightness(0) invert(1);
+}
+
+.deco-tl { top: -25px; left: -25px; transform: rotate(-20deg); }
+.deco-tr { top: -25px; right: -25px; transform: rotate(20deg); }
+.deco-bl { bottom: -20px; left: -20px; transform: rotate(15deg); }
+.deco-br { bottom: -20px; right: -20px; transform: rotate(-15deg); }
+
+@media (max-width: 480px) {
+    .christmas-popup-container { max-width: 320px; }
+    .christmas-message-box { padding: 25px 15px; }
+    .christmas-message-box h2 { font-size: 20px; }
+    .christmas-message-box p { font-size: 13px; }
+    .xmas-deco { width: 40px; }
+    .deco-tl { top: -15px; left: -10px; }
+    .deco-tr { top: -15px; right: -10px; }
+    .deco-bl { bottom: -15px; left: -10px; }
+    .deco-br { bottom: -15px; right: -10px; }
 }

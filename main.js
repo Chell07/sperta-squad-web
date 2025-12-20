@@ -1,13 +1,15 @@
 /**
- * - KONFIGURASI KUNCI DIPINDAHKAN ke config.js 
- * - Admin feature (login/logout/delete)
- * - Dynamic team loader
- * - Lyric sync
- * - UPDATED: Theme Toggle Icon (Sun/Moon)
+ * List Update:
+ * - Kunci API udah dipindah ke config.js biar aman.
+ * - Fitur Admin: Login, Logout, Hapus pesan (udah jalan).
+ * - Tim: Load otomatis biar gak capek ngetik satu-satu.
+ * - Lirik: Udah nge-sync sama lagu.
+ * - UPDATE BARU: Tombol ganti tema (Matahari/Bulan).
+ * - UPDATE NATAL: Efek salju, bintang kedip, pohon goyang, sama popup ucapan.
  */
 
 /*
-   MUSIC PLAYLIST - EDIT HERE
+   DAFTAR LAGU - Ganti di sini aja
 */
 const musicFiles = [
   'music/amelsound.mp3',
@@ -17,15 +19,15 @@ const musicFiles = [
 /* ============================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM ready — initializing site...');
+  console.log('Gas! Website siap meluncur...');
   Site.init();
 });
 
 const Site = (function(){
-  // Elements
+  // Ambil elemen HTML
   const audio = document.getElementById('background-music');
 
-  // Modern UI elements 
+  // Bagian Player Musik Modern
   const modern = {
     container: document.getElementById('modern-music-player'),
     toggle: document.getElementById('modern-toggle'),
@@ -43,17 +45,18 @@ const Site = (function(){
     totalTime: document.getElementById('modern-total')
   };
 
-  // State
+  // State (variable penyimpan kondisi)
   let currentIndex = 0;
   let isPlaying = false;
   let rafId = null;
   
-  // State Lirik
+  // Simpen state lirik di sini
   let currentLyrics = []; 
   let currentLyricIndex = -1;
 
-  /* ----------------- helpers ----------------- */
+  /* ----------------- Helper Functions ----------------- */
   function fmt(time){
+    // Format waktu biar jadi menit:detik
     if (!isFinite(time) || time <= 0) return '0:00';
     const m = Math.floor(time/60), s = Math.floor(time%60);
     return `${m}:${String(s).padStart(2,'0')}`;
@@ -64,7 +67,7 @@ const Site = (function(){
     return path.split('/').pop().replace(/\.[^/.]+$/, '');
   }
 
-  // Digunakan sebagai fallback
+  // Pake ini kalo metadata gak ketemu
   function metaFromPath(path){
     const base = baseName(path);
     const title = base.replace(/[-_]/g, ' ');
@@ -72,7 +75,7 @@ const Site = (function(){
     return { title: decodeURIComponent(title), artist: '', img };
   }
 
-  /* ----------------- audio controls ----------------- */
+  /* ----------------- Logic Kontrol Audio ----------------- */
   
   function loadTrack(index){
     if (!audio) return;
@@ -82,11 +85,13 @@ const Site = (function(){
       updateTimeUI(0,0);
       return;
     }
+    // Logic biar playlist muter terus (loop)
     currentIndex = ((index % musicFiles.length) + musicFiles.length) % musicFiles.length;
     const path = musicFiles[currentIndex];
     audio.src = path;
     audio.load();
 
+    // Reset lirik
     currentLyrics = [];
     currentLyricIndex = -1;
     modern.lyrics.textContent = '...'; 
@@ -94,12 +99,13 @@ const Site = (function(){
     const base = baseName(path); 
     const lyricFilePath = `${base}.json`; 
 
-    console.log(`Memuat lagu: ${path}. Mencoba lirik/meta dari: ${lyricFilePath}`);
+    console.log(`Lagi muter: ${path}. Nyari lirik di: ${lyricFilePath}`);
 
+    // Coba ambil file lirik
     fetch(lyricFilePath)
       .then(res => {
           if (!res.ok) {
-            throw new Error(`File JSON '${lyricFilePath}' tidak ditemukan.`);
+            throw new Error(`File JSON '${lyricFilePath}' gak ketemu euy.`);
           }
           return res.json();
       })
@@ -116,13 +122,13 @@ const Site = (function(){
           renderMeta({ title: title, artist: artist, img: img });
 
         } else {
-          throw new Error(`Format file JSON '${lyricFilePath}' salah.`);
+          throw new Error(`Format JSON '${lyricFilePath}' salah, cek lagi strukturnya.`);
         }
       })
       .catch(err => {
-        console.warn(`Gagal memuat metadata/lirik dari ${lyricFilePath}:`, err.message);
+        console.warn(`Gagal load metadata/lirik (${lyricFilePath}):`, err.message);
         currentLyrics = [];
-        modern.lyrics.textContent = 'Lirik tidak tersedia.'; 
+        modern.lyrics.textContent = 'Lirik belum ada.'; 
         const meta = metaFromPath(path);
         renderMeta(meta);
       });
@@ -130,7 +136,7 @@ const Site = (function(){
 
   function play(){
     if (!audio || !audio.src) return;
-    audio.play().catch(e => console.warn('Playback prevented:', e));
+    audio.play().catch(e => console.warn('Browser nge-block autoplay:', e));
     isPlaying = true;
     updatePlayIcon();
     startRAF();
@@ -189,7 +195,7 @@ const Site = (function(){
   }
 
   function onEnded(){
-    next();
+    next(); // Kalo abis, lanjut lagu berikutnya
   }
 
   function seek(e){
@@ -201,6 +207,7 @@ const Site = (function(){
     onTimeUpdate();
   }
 
+  // Pake RAF biar smooth bar-nya
   function startRAF(){
     cancelRAF();
     const step = () => {
@@ -225,6 +232,7 @@ const Site = (function(){
     let newLyricIndex = -1;
     let currentLyricText = null;
     
+    // Loop cari lirik yang pas sama timing
     for (let i = 0; i < currentLyrics.length; i++) {
       if (currentLyrics[i].time <= time) {
         currentLyricText = currentLyrics[i].text;
@@ -245,7 +253,7 @@ const Site = (function(){
     }
   }
 
-  /* ----------------- UI binding ----------------- */
+  /* ----------------- Sambungin ke UI ----------------- */
   function attachModernUI(){
     if (!modern) return;
 
@@ -262,11 +270,12 @@ const Site = (function(){
     if (modern.album) {
       modern.album.onerror = function() {
         if (!this.src.endsWith('elaina.jpg')) {
-          this.src = 'images/elaina.jpg';
+          this.src = 'images/elaina.jpg'; // Fallback gambar
         }
       };
     }
 
+    // Shortcut spasi buat play/pause (kecuali lagi ngetik)
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
         e.preventDefault();
@@ -274,7 +283,7 @@ const Site = (function(){
       }
     });
 
-    // audio events
+    // Event listener audio bawaan
     if (!audio) return;
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('timeupdate', onTimeUpdate);
@@ -283,7 +292,7 @@ const Site = (function(){
     audio.addEventListener('pause', () => { isPlaying = false; updatePlayIcon(); cancelRAF(); });
   }
 
-  /* ----------------- other site features ----------------- */
+  /* ----------------- Fitur Lainnya ----------------- */
   function initImageViewer(){
     const viewer = document.getElementById('image-viewer');
     const viewerImage = document.getElementById('viewer-image');
@@ -307,7 +316,7 @@ const Site = (function(){
           viewerImage.src = imgs[currentViewerIndex].src;
           viewerImage.alt = imgs[currentViewerIndex].alt;
           if (currentIndexEl) currentIndexEl.textContent = currentViewerIndex + 1;
-          document.body.style.overflow = 'hidden';
+          document.body.style.overflow = 'hidden'; // Matiin scroll
       });
     });
 
@@ -334,7 +343,7 @@ const Site = (function(){
     const scrollContainer = document.querySelector('.team-member-scroll');
     
     if (!scrollContainer) {
-      console.warn('Elemen .team-member-scroll tidak ditemukan. Batal memuat tim.');
+      console.warn('Waduh, container tim gak ketemu. Gak jadi load tim.');
       return;
     }
     
@@ -342,6 +351,7 @@ const Site = (function(){
     
     let photoCount = 0; 
 
+    // Rekursif buat load gambar satu-satu
     function checkAndAddImage(index) {
       const imgPath = `images/team${index}.jpg`;
       const img = new Image(); 
@@ -362,7 +372,7 @@ const Site = (function(){
       };
       
       img.onerror = function() {
-        console.log(`Deteksi tim selesai. Ditemukan ${photoCount} anggota.`);
+        console.log(`Selesai load tim. Ketemu ${photoCount} orang.`);
         initImageViewer(); 
       };
       
@@ -374,27 +384,27 @@ const Site = (function(){
   
   
   // =========================================================================
-  // === FUNGSI initAnonymousFeature (Admin + Kunci Aman) ===
+  // === LOGIC FITUR ANONIM & ADMIN (Hati-hati edit sini) ===
   // =========================================================================
   function initAnonymousFeature() {
-    // Cek apakah Firebase, Auth, dan Kunci sudah ter-load
+    // Cek dulu, firebase udah keload apa belom
     if (typeof firebase === 'undefined' || typeof firebase.firestore === 'undefined' || typeof firebase.auth === 'undefined') {
-      console.error('Firebase SDK (Firestore/Auth) tidak ditemukan. Fitur anonim tidak akan berfungsi.');
+      console.error('Firebase SDK gak ketemu bos. Fitur anonim mati.');
       const listElement = document.getElementById('anon-messages-list');
-      if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Gagal memuat Firebase.</div>';
+      if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Gagal load Firebase.</div>';
       return;
     }
     
-    // Cek apakah file config.js sudah memuat variabel firebaseConfig
+    // Cek config.js
     if (typeof firebaseConfig === 'undefined') {
-        console.error('File config.js tidak ditemukan atau variabel firebaseConfig tidak ada.');
+        console.error('Config.js ilang atau variabelnya gak ada.');
         const listElement = document.getElementById('anon-messages-list');
-        if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Configuration Error.</div>';
+        if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Error Konfigurasi.</div>';
         return;
     }
     
     try {
-      // Variabel 'firebaseConfig' diambil dari file 'config.js'
+      // Inisialisasi Firebase pake config dari file sebelah
       if (!firebase.apps.length) {
           firebase.initializeApp(firebaseConfig);
       }
@@ -412,18 +422,18 @@ const Site = (function(){
       const logoutBtn = document.getElementById('admin-logout-btn');
       
       if (!messageInput || !submitButton || !charCounter || !messagesList || !loginBtn || !logoutBtn) {
-          console.error("Elemen DOM untuk fitur anonim atau admin tidak ditemukan.");
+          console.error("Ada elemen HTML yang ilang nih buat fitur anonim.");
           return;
       }
 
-      // === LOGIKA AUTENTIKASI ===
+      // === LOGIKA LOGIN ADMIN ===
       let isAdmin = false; 
       const provider = new firebase.auth.GoogleAuthProvider();
 
       loginBtn.addEventListener('click', () => {
           auth.signInWithPopup(provider).catch(error => {
-              console.error("Login gagal:", error);
-              alert("Login gagal. Coba lagi.");
+              console.error("Gagal login:", error);
+              alert("Gagal login. Coba lagi deh.");
           });
       });
 
@@ -433,22 +443,22 @@ const Site = (function(){
 
       auth.onAuthStateChanged(user => {
           if (user) {
-              console.log("Admin terdeteksi:", user.uid);
+              console.log("Admin masuk:", user.uid);
               isAdmin = true;
               loginBtn.style.display = 'none'; 
               logoutBtn.style.display = 'block'; 
           } else {
-              console.log("Admin logout.");
+              console.log("Admin keluar.");
               isAdmin = false;
               loginBtn.style.display = 'block'; 
               logoutBtn.style.display = 'none'; 
           }
           loadMessages();
       });
-      // === AKHIR LOGIKA AUTENTIKASI ===
+      // === SELESAI LOGIKA LOGIN ===
 
 
-      // --- Fitur 1: Character Counter ---
+      // --- Fitur 1: Hitung Karakter ---
       messageInput.addEventListener('input', () => {
         const length = messageInput.value.length;
         const maxLength = messageInput.maxLength;
@@ -464,11 +474,11 @@ const Site = (function(){
       // --- Fitur 2: Kirim Pesan ---
       submitButton.addEventListener('click', async () => {
         const messageText = messageInput.value.trim();
-        if (messageText.length < 5) { alert('Pesan terlalu pendek (minimal 5 karakter).'); return; }
-        if (messageText.length > 500) { alert('Pesan terlalu panjang (maksimal 500 karakter).'); return; }
+        if (messageText.length < 5) { alert('Pendek banget bang, minimal 5 huruf lah.'); return; }
+        if (messageText.length > 500) { alert('Kepanjangan, max 500 huruf aja.'); return; }
 
         submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengirim...';
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sabar...';
 
         try {
           await messagesCollection.add({
@@ -479,15 +489,15 @@ const Site = (function(){
           charCounter.textContent = '0 / 500';
           charCounter.classList.remove('limit-reached');
         } catch (error) {
-          console.error("Error mengirim pesan: ", error);
-          alert('Gagal mengirim pesan. Coba lagi nanti.');
+          console.error("Gagal kirim:", error);
+          alert('Yah gagal kirim. Coba nanti lagi.');
         } finally {
           submitButton.disabled = false;
           submitButton.innerHTML = '<i class="fa-regular fa-paper-plane"></i> Kirim';
         }
       });
 
-      // --- Fitur 3: Tampilkan Pesan ---
+      // --- Fitur 3: Tampilin Pesan ---
       let messagesListener = null;
       
       function loadMessages() {
@@ -498,7 +508,7 @@ const Site = (function(){
               messagesList.innerHTML = '';
               
               if (snapshot.empty) {
-                messagesList.innerHTML = '<div class="anon-message-loading">Belum ada pesan. Jadilah yang pertama!</div>';
+                messagesList.innerHTML = '<div class="anon-message-loading">Masih sepi nih. Jadilah yang pertama!</div>';
                 return;
               }
 
@@ -511,12 +521,13 @@ const Site = (function(){
                 const date = data.timestamp ? data.timestamp.toDate().toLocaleString('id-ID', {
                     dateStyle: 'medium',
                     timeStyle: 'short'
-                }) : 'Baru saja';
+                }) : 'Barusan';
                 
                 const safeText = data.text
                                     .replace(/</g, "&lt;")
                                     .replace(/>/g, "&gt;");
 
+                // Tombol hapus cuma nongol kalo Admin
                 const adminButtonHTML = isAdmin 
                   ? `<button class="admin-delete-btn" data-id="${messageId}" title="Hapus pesan ini">
                        <i class="fa-solid fa-trash-can"></i>
@@ -533,35 +544,35 @@ const Site = (function(){
               });
               
             }, error => {
-                console.error("Error mengambil pesan: ", error);
+                console.error("Gagal ambil data:", error);
                 messagesList.innerHTML = '<div class="anon-message-loading">Gagal memuat pesan.</div>';
             });
       }
       
-      // === FITUR Hapus Pesan ===
+      // === FITUR HAPUS PESAN ===
       messagesList.addEventListener('click', async (e) => {
           const deleteButton = e.target.closest('.admin-delete-btn');
           
           if (deleteButton && isAdmin) {
               const messageId = deleteButton.dataset.id; 
               
-              if (confirm('Anda yakin ingin menghapus pesan ini secara permanen?')) {
+              if (confirm('Yakin mau hapus pesan ini? Gak bisa dibalikin loh.')) {
                   try {
                       await messagesCollection.doc(messageId).delete();
-                      console.log("Pesan berhasil dihapus:", messageId);
+                      console.log("Pesan dihapus:", messageId);
                   } catch (error) {
-                      console.error("Error menghapus pesan:", error);
-                      alert('Gagal menghapus pesan. (Pastikan UID Anda benar di Security Rules)');
+                      console.error("Gagal hapus:", error);
+                      alert('Gagal hapus. Cek Rules Firebase lu.');
                   }
               }
           }
       });
-      // === AKHIR FITUR HAPUS ===
+      // === SELESAI FITUR HAPUS ===
 
     } catch (e) {
-        console.error("Error saat inisialisasi Firebase:", e);
+        console.error("Error inisialisasi:", e);
         const listElement = document.getElementById('anon-messages-list');
-        if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Error konfigurasi Firebase.</div>';
+        if(listElement) listElement.innerHTML = '<div class="anon-message-loading">Error config Firebase.</div>';
     }
   }
   // ===== BATAS FUNGSI ANONIM/ADMIN =====
@@ -584,7 +595,7 @@ const Site = (function(){
       videoPopup.classList.add('active');
       document.body.style.overflow = 'hidden';
       setTimeout(()=> {
-        popupVideo.play().catch(e => console.warn('Video popup playback prevented:', e));
+        popupVideo.play().catch(e => console.warn('Autoplay popup diblok:', e));
       }, 200);
     }
     function close(){
@@ -631,7 +642,7 @@ const Site = (function(){
       });
     });
 
-    // back to top
+    // logic back to top
     let backToTop = document.getElementById('back-to-top');
     if (!backToTop) {
       backToTop = document.createElement('div');
@@ -663,15 +674,15 @@ const Site = (function(){
     }
   }
 
-  /* ----------------- Theme Toggle (UPDATED: SUN/MOON ICON) ----------------- */
+  /* ----------------- GANTI TEMA (Matahari / Bulan) ----------------- */
   
-  // Helper: Update ikon berdasarkan mode
+  // Helper: Ganti ikon sesuai mode
   function updateThemeIcon(isDark) {
     const themeToggle = document.querySelector('.theme-toggle');
     if (!themeToggle) return;
 
-    // Jika Dark Mode -> Muncul Bulan
-    // Jika Light Mode -> Muncul Matahari
+    // Kalo gelap -> Bulan
+    // Kalo terang -> Matahari
     if (isDark) {
       themeToggle.innerHTML = '<i class="fas fa-moon"></i>'; 
     } else {
@@ -685,7 +696,7 @@ const Site = (function(){
     if (!themeToggle) {
       const btn = document.createElement('button');
       btn.className = 'theme-toggle';
-      // Icon default sementara
+      // Icon default
       btn.innerHTML = '<i class="fas fa-sun"></i>'; 
       document.body.appendChild(btn);
       btn.addEventListener('click', toggleTheme);
@@ -693,10 +704,10 @@ const Site = (function(){
       themeToggle.addEventListener('click', toggleTheme);
     }
 
-    // Cek preferensi
+    // Cek settingan user sebelumnya
     const saved = localStorage.getItem('theme') || (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
     
-    // Terapkan mode awal & update ikon
+    // Set mode awal
     if (saved === 'dark') {
       document.body.classList.add('dark-mode');
       updateThemeIcon(true);
@@ -712,7 +723,7 @@ const Site = (function(){
     updateThemeIcon(isDark);
   }
 
-  /* ----------------- Loading & Typing ----------------- */
+  /* ----------------- Animasi Loading & Typing ----------------- */
   function initLoadingAndTyping(){
     const loadingScreen = document.getElementById('loading-screen');
     const loadingText = document.getElementById('loading-text');
@@ -770,9 +781,10 @@ const Site = (function(){
         startSequenceThenHide();
       };
       window.addEventListener('load', () => runOnce());
-      setTimeout(() => runOnce(), 6500);
+      setTimeout(() => runOnce(), 6500); // Timeout jaga-jaga
     }
 
+    // Efek ngetik sendiri
     const typingElement = document.querySelector('.info-home h3');
     if (typingElement) {
       const words = ["Computer Engineering Students", "Web Development Learners", "Politeknik Negeri Manado", "Sperta Squad"];
@@ -789,13 +801,103 @@ const Site = (function(){
     }
   }
 
-  /* ----------------- initialization ----------------- */
+  /* ----------------- SIHIR NATAL (POPUP & EFEK) ----------------- */
+  function initChristmasMagic() {
+    const container = document.getElementById('christmas-container');
+    if (!container) return;
+
+    // 1. Buat Salju
+    const snowCount = 50;
+    const snowChars = ['❄', '❅', '❆', '•'];
+    for (let i = 0; i < snowCount; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snowflake');
+        snowflake.textContent = snowChars[Math.floor(Math.random() * snowChars.length)];
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
+        snowflake.style.opacity = Math.random();
+        snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+        container.appendChild(snowflake);
+    }
+
+    // 2. Buat Bintang
+    const starCount = 12;
+    function relocateAndTwinkle(star) {
+        const duration = Math.random() * 1500 + 1500;
+        star.style.left = Math.random() * 100 + 'vw';
+        star.style.top = Math.random() * 100 + 'vh';
+        star.style.fontSize = Math.random() * 15 + 8 + 'px';
+        requestAnimationFrame(() => { star.classList.add('visible'); });
+        setTimeout(() => {
+            star.classList.remove('visible');
+            setTimeout(() => { relocateAndTwinkle(star); }, 1000);
+        }, duration);
+    }
+    for (let i = 0; i < starCount; i++) {
+        const star = document.createElement('div');
+        star.classList.add('christmas-star');
+        star.innerHTML = '<i class="fas fa-star"></i>';
+        container.appendChild(star);
+        setTimeout(() => { relocateAndTwinkle(star); }, Math.random() * 3000);
+    }
+
+    // --- 3. POHON NATAL & LOGIC POPUP ---
+
+    // Buat Widget Pohon
+    const tree = document.createElement('div');
+    tree.className = 'christmas-tree-widget';
+    tree.innerHTML = '<i class="fas fa-tree" style="color:#2ecc71;"></i><i class="fas fa-star" style="color:#f1c40f; position:absolute; top:-10px; left:50%; transform:translateX(-50%); font-size:15px;"></i>';
+    tree.title = "Klik buat liat ucapan!";
+    document.body.appendChild(tree);
+
+    // Ambil elemen Popup yang udah dibuat di HTML
+    const popupOverlay = document.getElementById('christmas-popup');
+    const closePopupBtn = document.getElementById('close-xmas-popup');
+
+    // Buka Popup
+    function openChristmasPopup() {
+        if (popupOverlay) {
+            popupOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Matiin scroll
+        }
+    }
+
+    // Tutup Popup
+    function closeChristmasPopup() {
+        if (popupOverlay) {
+            popupOverlay.classList.remove('active');
+            document.body.style.overflow = ''; // Hidupin scroll lagi
+        }
+    }
+
+    // Klik Pohon -> Buka Popup
+    tree.addEventListener('click', (e) => {
+        e.stopPropagation(); 
+        openChristmasPopup();
+    });
+
+    // Klik Tombol X -> Tutup
+    if (closePopupBtn) {
+        closePopupBtn.addEventListener('click', closeChristmasPopup);
+    }
+
+    // Klik di luar kotak (di background gelap) -> Tutup
+    if (popupOverlay) {
+        popupOverlay.addEventListener('click', (e) => {
+            if (e.target === popupOverlay) {
+                closeChristmasPopup();
+            }
+        });
+    }
+  }
+
+  /* ----------------- Initialization (Mulai Semua) ----------------- */
   function init(){
     attachModernUI();
     loadTrack(0); 
     
     initDynamicTeamLoader(); 
-    initAnonymousFeature(); // Aktifkan Firebase + Auth
+    initAnonymousFeature(); 
     
     initVideoPopup();
     initNavAndBackToTop();
@@ -803,7 +905,10 @@ const Site = (function(){
     initTeamScroll();
     initThemeToggle();
     initLoadingAndTyping();
+    
+    initChristmasMagic(); // Load efek natal
 
+    // Pancing audio biar bisa play di beberapa browser
     document.addEventListener('click', function first() {
       if (audio && audio.src && !isPlaying) {
         audio.play().then(()=> audio.pause()).catch(e => console.warn('Audio priming failed:', e));
@@ -815,7 +920,7 @@ const Site = (function(){
   return { init };
 })();
 
-// Variabel global (biarkan saja)
+// Variabel global buatjagajaga
 let userData = null;
 let currentLyricIndex = -1;
 let songDuration = 60;
