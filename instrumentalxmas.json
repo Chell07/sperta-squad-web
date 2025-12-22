@@ -1,0 +1,12 @@
+{
+    "music": {
+        "title": "Chrismast Miracle",
+        "artist": "AshamaluevMusic",
+        "albumArt": "images/xmas.jpg",
+        "audioFile": "music/instrumentalxmas.mp3",
+        "duration": 180,
+        "timeSync": [
+{ "time": 0.0, "text": "Instrumental" }
+        ]
+    }
+}

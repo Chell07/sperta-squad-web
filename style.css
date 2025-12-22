@@ -1660,7 +1660,8 @@ body.dark-mode .snowflake {
 
 .christmas-star {
   position: absolute;
-  font-size: 0;
+  font-size: 24px; /* DIPERBAIKI: Sebelumnya 0, jadi gak kelihatan */
+  transform: scale(0); /* DITAMBAH: Awalnya kecil biar pas muncul ada efek pop */
   opacity: 0;
   pointer-events: none;
   transition: opacity 1s ease-in-out, transform 1s ease-in-out, color 0.3s ease;

@@ -9,6 +9,8 @@
  * - UPDATE (LAGI): Animasinya dibikin smooth pake bezier.
  * - UPDATE (LAGI2): Pas minimize, animasi dibikin antri (konten ilang dulu -> baru kotak kecil).
  * - ADA EFEK NATALNYA JUGA DONG! Salju, Bintang, Pohon.
+ * - UPDATE BUG FIX: Counter foto team sekarang dinamis & support tombol panah keyboard.
+ * - UPDATE FITUR: Lagu sekarang otomatis Loop (muter ulang) sampe user ganti sendiri.
  */
 
 /*
@@ -17,15 +19,24 @@
    Formatnya: 'folder/namafile.mp3'
 */
 const musicFiles = [
+  'music/instrumentalxmas.mp3',
   'music/amelsound.mp3',
   'music/sigma.mp3',
   'music/sperta.mp3'
 ];
-/* ============================ */
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('Web udah siap gan, gas!');
-  Site.init();
+  console.log('Web initializing...');
+  // Pake try-catch biar kalau ada error, loading screen dipaksa ilang (Safety Net)
+  try {
+    Site.init();
+  } catch (error) {
+    console.error("Critical Error saat init:", error);
+    // Kalau error parah, paksa buka loading screen biar gak blank
+    const loader = document.getElementById('loading-screen');
+    if (loader) loader.style.display = 'none';
+    document.body.style.overflow = '';
+  }
 });
 
 const Site = (function() {
@@ -83,7 +94,7 @@ const Site = (function() {
     };
   }
 
-  // Logic ganti lagu
+  // Logic ganti lagu & LOOP
   function loadTrack(index) {
     if (!audio) return;
     if (!musicFiles || musicFiles.length === 0) {
@@ -100,6 +111,11 @@ const Site = (function() {
     currentIndex = ((index % musicFiles.length) + musicFiles.length) % musicFiles.length;
     const path = musicFiles[currentIndex];
     audio.src = path;
+    
+    // === FITUR LOOP LAGU ===
+    // Ini bikin lagu muter ulang-ulang terus
+    audio.loop = true; 
+    
     audio.load();
 
     // Reset lirik biar bersih
@@ -205,7 +221,8 @@ const Site = (function() {
   }
 
   function onEnded() {
-    next(); // Lanjut lagu berikutnya otomatis
+    // Karena audio.loop = true, ini jarang kepanggil kecuali loop dimatiin manual.
+    next(); 
   }
 
   // Buat geser-geser progress bar
@@ -316,10 +333,14 @@ const Site = (function() {
     });
   }
 
-  // Fitur liat foto zoom
+  // Fitur liat foto zoom (IMAGE VIEWER - FIXED)
   function initImageViewer() {
     const viewer = document.getElementById('image-viewer');
     const viewerImage = document.getElementById('viewer-image');
+    // Elemen buat update angka counter
+    const currentIndexSpan = document.getElementById('current-index');
+    const totalImagesSpan = document.getElementById('total-images');
+    
     if (!viewer || !viewerImage) return;
 
     const imgs = Array.from(document.querySelectorAll('.member-photo-simple')).map(img => ({
@@ -327,6 +348,11 @@ const Site = (function() {
       alt: img.alt
     }));
     let currentViewerIndex = 0;
+    
+    // FIX: Set Total Images di awal sesuai jumlah foto yg ada
+    if (totalImagesSpan) {
+        totalImagesSpan.textContent = imgs.length;
+    }
 
     document.querySelectorAll('.member-photo-simple').forEach((img, idx) => {
       const newImg = img.cloneNode(true);
@@ -335,21 +361,23 @@ const Site = (function() {
       newImg.addEventListener('click', () => {
         currentViewerIndex = idx;
         viewer.classList.add('active');
-        viewerImage.src = imgs[currentViewerIndex].src;
-        viewerImage.alt = imgs[currentViewerIndex].alt;
+        // Panggil fungsi updateViewer biar gambar & angka langsung bener
+        updateViewer(currentViewerIndex);
         document.body.style.overflow = 'hidden';
       });
     });
 
     const closeBtn = document.querySelector('.close-viewer');
-    if (closeBtn) closeBtn.addEventListener('click', () => {
-      viewer.classList.remove('active');
-      document.body.style.overflow = '';
-    });
-    viewer.addEventListener('click', (e) => {
-      if (e.target === viewer) {
+
+    function closeViewer() {
         viewer.classList.remove('active');
         document.body.style.overflow = '';
+    }
+
+    if (closeBtn) closeBtn.addEventListener('click', closeViewer);
+    viewer.addEventListener('click', (e) => {
+      if (e.target === viewer) {
+        closeViewer();
       }
     });
 
@@ -360,6 +388,11 @@ const Site = (function() {
       currentViewerIndex = (i + imgs.length) % imgs.length;
       viewerImage.src = imgs[currentViewerIndex].src;
       viewerImage.alt = imgs[currentViewerIndex].alt;
+      
+      // Bug fix: Update angka counter saat geser
+      if (currentIndexSpan) {
+          currentIndexSpan.textContent = currentViewerIndex + 1;
+      }
     }
 
     if (prevBtn) prevBtn.addEventListener('click', (e) => {
@@ -369,6 +402,20 @@ const Site = (function() {
     if (nextBtn) nextBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       updateViewer(currentViewerIndex + 1);
+    });
+
+    // Bug fix: Tambah event listener keyboard (Panah Kiri/Kanan)
+    document.addEventListener('keydown', (e) => {
+        // Cek kalo viewer lagi aktif aja
+        if (viewer.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                updateViewer(currentViewerIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                updateViewer(currentViewerIndex + 1);
+            } else if (e.key === 'Escape') {
+                closeViewer();
+            }
+        }
     });
   }
 
@@ -395,7 +442,7 @@ const Site = (function() {
         checkAndAddImage(index + 1);
       };
       img.onerror = function() {
-        // Stop kalo gambar udah gak ketemu
+        // Stop kalo gambar udah gak ketemu, baru jalankan viewer
         initImageViewer();
       };
       img.src = imgPath;
@@ -690,7 +737,7 @@ const Site = (function() {
     updateThemeIcon(isDark);
   }
 
-  // Loading Screen & Typing Effect
+  // Loading Screen & Typing Effect (FIXED BLACK SCREEN)
   function initLoadingAndTyping() {
     const loadingScreen = document.getElementById('loading-screen');
     const loadingText = document.getElementById('loading-text');
@@ -707,17 +754,19 @@ const Site = (function() {
       }, delay);
     }
 
+    // Fungsi helper untuk menghilangkan loading dengan aman
     function hideLoadingSequence() {
+      // Tunggu dikit biar animasi selesai
       setTimeout(() => {
-        if (loadingScreen) {
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
           loadingScreen.style.transition = 'opacity 0.45s ease';
           loadingScreen.style.opacity = '0';
+          setTimeout(() => {
+            if (loadingScreen) loadingScreen.style.display = 'none';
+            if (mainPage) mainPage.classList.add('visible');
+            document.body.style.overflow = '';
+          }, 500);
         }
-        setTimeout(() => {
-          if (loadingScreen) loadingScreen.style.display = 'none';
-          if (mainPage) mainPage.classList.add('visible');
-          document.body.style.overflow = '';
-        }, 500);
       }, 350);
     }
 
@@ -728,6 +777,14 @@ const Site = (function() {
       showElement(designerText, 2200);
       setTimeout(hideLoadingSequence, 3200);
     }
+
+    // FAILSAFE: Jika dalam 4 detik masih loading (karena bug atau internet lambat), paksa hilang
+    setTimeout(() => {
+        if (loadingScreen && loadingScreen.style.display !== 'none') {
+            console.warn("Loading screen timeout forced.");
+            hideLoadingSequence();
+        }
+    }, 4000);
 
     if (!loadingScreen) {
       if (mainPage) mainPage.classList.add('visible');
@@ -742,7 +799,6 @@ const Site = (function() {
       setTimeout(startSequenceThenHide, 200);
     } else {
       window.addEventListener('load', () => startSequenceThenHide());
-      setTimeout(() => startSequenceThenHide(), 6500);
     }
 
     const typingElement = document.querySelector('.info-home h3');
@@ -776,7 +832,7 @@ const Site = (function() {
     }
   }
 
-  // EFEK NATAL (POPUP & EFEK)
+  // EFEK NATAL (POPUP & EFEK - STARS RESTORED!)
   function initChristmasMagic() {
     const container = document.getElementById('christmas-container');
     if (!container) return;
@@ -793,7 +849,7 @@ const Site = (function() {
       container.appendChild(snowflake);
     }
 
-    // Bikin bintang kedip-kedip
+    // Bikin bintang kedip-kedip (INI YANG TADI HILANG, UDAH BALIK YA!)
     for (let i = 0; i < 12; i++) {
       const star = document.createElement('div');
       star.classList.add('christmas-star');
@@ -837,26 +893,37 @@ const Site = (function() {
   }
 
   function init() {
-    attachModernUI();
-    loadTrack(0);
-    initDynamicTeamLoader();
-    initAnonymousFeature();
-    initVideoPopup();
-    initNavAndBackToTop();
-    initRevealObserver();
-    initTeamScroll();
-    initThemeToggle();
-    initLoadingAndTyping();
-    initChristmasMagic();
-    document.addEventListener('click', function first() {
-      if (audio && audio.src && !isPlaying) {
-        audio.play().then(() => audio.pause()).catch(() => {});
-      }
-      document.removeEventListener('click', first);
-    }, {
-      once: true,
-      capture: true
-    });
+    // Jalankan semua fungsi
+    try {
+        attachModernUI();
+        loadTrack(0);
+        initDynamicTeamLoader();
+        initAnonymousFeature();
+        initVideoPopup();
+        initNavAndBackToTop();
+        initRevealObserver();
+        initTeamScroll();
+        initThemeToggle();
+        initLoadingAndTyping();
+        initChristmasMagic();
+        
+        // Hack biar autoplay jalan saat user pertama kali interaksi
+        document.addEventListener('click', function first() {
+          if (audio && audio.src && !isPlaying) {
+            audio.play().then(() => audio.pause()).catch(() => {});
+          }
+          document.removeEventListener('click', first);
+        }, {
+          once: true,
+          capture: true
+        });
+    } catch(e) {
+        console.error("Error di fungsi init utama:", e);
+        // Pastikan loading screen hilang kalau ada error di sini
+        const loader = document.getElementById('loading-screen');
+        if (loader) loader.style.display = 'none';
+        document.body.style.overflow = '';
+    }
   }
 
   return {
