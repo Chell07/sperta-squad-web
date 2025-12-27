@@ -1,7 +1,6 @@
-/* =========================================
-   1. RESET & GLOBAL STYLES
+/*1. RESET & GLOBAL STYLES
    Mengatur ulang gaya bawaan browser agar konsisten
-   ========================================= */
+*/
 * {
   margin: 0;
   padding: 0;
@@ -18,10 +17,9 @@ body {
   position: relative;
 }
 
-/* =========================================
-   2. HEADER (NAVBAR)
+/*2. HEADER (NAVBAR)
    Bagian navigasi atas yang melayang
-   ========================================= */
+*/
 header {
   position: fixed;
   top: 20px;
@@ -136,10 +134,9 @@ header {
   transform: scale(1.1);
 }
 
-/* =========================================
-   3. CONTENT SECTIONS
+/*3. CONTENT SECTIONS
    Layout dasar untuk setiap bagian halaman
-   ========================================= */
+*/
 section,
 .home,
 .about,
@@ -149,7 +146,7 @@ section,
   z-index: 5;
 }
 
-/* --- HOME SECTION --- */
+/* HOME SECTION */
 .home {
   margin: 160px 200px;
   padding-top: 40px;
@@ -263,7 +260,7 @@ hr {
   background: #fff;
 }
 
-/* --- ABOUT SECTION --- */
+/* ABOUT SECTION */
 .about {
   margin: 160px 200px;
 }
@@ -320,7 +317,7 @@ hr {
   color: #1e40af;
 }
 
-/* --- VIDEO CONTAINER (Di dalam About) --- */
+/* VIDEO CONTAINER (Di dalam About) */
 .video-container {
   position: relative;
   width: 225px;
@@ -373,7 +370,7 @@ hr {
   transform: scale(1.05);
 }
 
-/* --- VIDEO POPUP (Modal) --- */
+/* VIDEO POPUP (Modal) */
 .video-popup {
   position: fixed;
   top: 0;
@@ -438,7 +435,7 @@ hr {
   transform: scale(1.1);
 }
 
-/* --- TEAM SECTION --- */
+/* TEAM SECTION (KEMBALI KE 450px) */
 .team {
   margin: 160px 200px;
   display: flex;
@@ -496,6 +493,7 @@ hr {
   scrollbar-width: none;
   -ms-overflow-style: none;
   scroll-behavior: smooth;
+  display: block; 
 }
 
 .team-scroll-wrapper::-webkit-scrollbar {
@@ -504,14 +502,15 @@ hr {
 
 .team-member-scroll {
   display: flex;
-  gap: 40px;
+  gap: 30px;
   padding: 20px;
   min-width: min-content;
 }
 
 /* Kartu Anggota Tim */
 .member-card-simple {
-  flex: 0 0 450px;
+  /* [UPDATE] Dikembalikan ke 450px sesuai permintaan */
+  flex: 0 0 450px; 
   background: #fff;
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -571,20 +570,19 @@ hr {
   60% { transform: translateX(-5px); }
 }
 
-/* --- IMAGE VIEWER (Zoom Foto Tim) --- */
+/* IMAGE VIEWER (Updated: UKURAN POPUP LEBIH KECIL) */
 .image-viewer {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  display: none;
+  display: none; /* JS akan ubah jadi flex */
   justify-content: center;
   align-items: center;
   z-index: 2000;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
 
 .image-viewer.active {
@@ -592,60 +590,149 @@ hr {
   opacity: 1;
 }
 
-.viewer-content {
-  position: relative;
-  max-width: 90%;
-  max-height: 90%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* Backdrop terpisah untuk efek blur */
+.viewer-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Hitam transparan biar tidak terlalu gelap */
+  backdrop-filter: blur(10px);      /* EFEK BLUR */
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 1;
 }
 
-.viewer-image-container {
-  max-width: 80vw;
-  max-height: 80vh;
+.viewer-content {
+  position: relative;
+  z-index: 2; /* Di atas backdrop */
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  max-width: 90%;
+  max-height: 90%;
+  animation: popupScale 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@keyframes popupScale {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* Wrapper untuk gambar + dekorasi */
+.viewer-image-wrapper {
+  position: relative;
+  padding: 15px;
+  display: inline-block;
+}
+
+/* Container gambar (POPUP DIPERKECIL) */
+.viewer-image-container {
+  position: relative;
+  z-index: 2;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  /* [UPDATE] Membatasi ukuran popup agar tidak terlalu besar */
+  max-width: 600px;  /* Lebar maks 500px */
+  max-height: 70vh;  /* Tinggi maks 60% layar */
+  
+  display: flex;
 }
 
 #viewer-image {
   max-width: 100%;
-  max-height: 100%;
+  max-height: 70vh; /* Sesuaikan dengan container */
   object-fit: contain;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: block;
 }
 
+/* DEKORASI SUDUT (INTERAKTIF) */
+.viewer-decoration {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #474af0; /* Warna biru tema */
+  z-index: 3;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+/* Top Left */
+.deco-tl {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+/* Top Right */
+.deco-tr {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+/* Bottom Left */
+.deco-bl {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+/* Bottom Right */
+.deco-br {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Efek saat wrapper di-hover (dekorasi agak melebar) */
+.viewer-image-wrapper:hover .deco-tl { transform: translate(-5px, -5px); }
+.viewer-image-wrapper:hover .deco-tr { transform: translate(5px, -5px); }
+.viewer-image-wrapper:hover .deco-bl { transform: translate(-5px, 5px); }
+.viewer-image-wrapper:hover .deco-br { transform: translate(5px, 5px); }
+
+/* Tombol Close */
 .close-viewer {
   position: absolute;
-  top: -40px;
-  right: 0;
+  top: -50px;
+  right: -10px;
   color: white;
   font-size: 30px;
   cursor: pointer;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.1);
   width: 40px;
   height: 40px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  backdrop-filter: blur(5px);
   transition: all 0.3s ease;
+  z-index: 10;
 }
 
 .close-viewer:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: scale(1.1);
+  background: #d93025;
+  transform: rotate(90deg);
 }
 
+/* Navigasi (Prev/Next) */
 .viewer-nav {
-  position: absolute;
+  position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   width: 50px;
   height: 50px;
   border-radius: 50%;
@@ -655,35 +742,54 @@ hr {
   justify-content: center;
   font-size: 20px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(5px);
+  z-index: 10;
 }
 
 .viewer-nav:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #474af0;
   transform: translateY(-50%) scale(1.1);
+  border-color: #474af0;
 }
 
-.viewer-prev {
-  left: 20px;
-}
+.viewer-prev { left: 40px; }
+.viewer-next { right: 40px; }
 
-.viewer-next {
-  right: 20px;
-}
-
+/* Counter Angka */
 .viewer-counter {
-  position: absolute;
-  bottom: -40px;
-  left: 50%;
-  transform: translateX(-50%);
+  margin-top: 15px;
   color: white;
-  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
   background: rgba(0, 0, 0, 0.5);
   padding: 5px 15px;
   border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* --- FOOTER --- */
+/* Responsif Mobile untuk Viewer */
+@media (max-width: 768px) {
+  .viewer-image-container {
+    max-width: 95vw;
+  }
+  
+  .viewer-nav {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+    background: rgba(0,0,0,0.5); /* Lebih gelap di mobile biar kontras */
+  }
+  
+  .viewer-prev { left: 10px; }
+  .viewer-next { right: 10px; }
+  
+  .close-viewer {
+    top: -50px;
+    right: 0;
+  }
+}
+
+/* FOOTER */
 .footer {
   background: #000;
   color: #fff;
@@ -750,7 +856,7 @@ hr {
   color: #aaa;
 }
 
-/* --- LOADING SCREEN & ANIMATION --- */
+/* LOADING SCREEN & ANIMATION */
 #loading-screen {
   position: fixed;
   top: 0;
@@ -822,7 +928,7 @@ hr {
   50% { opacity: 0; }
 }
 
-/* --- THEME TOGGLE (Dark/Light Mode Button) --- */
+/* THEME TOGGLE (Dark/Light Mode Button) */
 .theme-toggle {
   position: fixed;
   bottom: 20px;
@@ -848,7 +954,7 @@ hr {
   transform: scale(1.1);
 }
 
-/* --- DARK MODE SETTINGS --- */
+/* DARK MODE SETTINGS */
 body.dark-mode {
   background-color: #120f12;
   color: #e0e0e0;
@@ -953,7 +1059,7 @@ body.dark-mode .about-video {
   border: 1px solid #444;
 }
 
-/* --- BACK TO TOP BUTTON --- */
+/* BACK TO TOP BUTTON */
 #back-to-top {
   position: fixed;
   bottom: 80px;
@@ -977,7 +1083,7 @@ body.dark-mode .about-video {
   background: #2c36d9;
 }
 
-/* --- UTILITY CLASSES --- */
+/* UTILITY CLASSES */
 .text-center {
   text-align: center;
 }
@@ -1029,9 +1135,9 @@ a:focus {
   color: white;
 }
 
-/* =======================================================
+/* ==============
    MUSIC PLAYER MODERN (UPDATED: LINKTREE STYLE)
-   ======================================================= */
+   ============== */
 :root {
   --primary: #474af0;
   --accent: #9b5cf6;
@@ -1298,10 +1404,9 @@ body.dark-mode .modern-progress-container {
   }
 }
 
-/* =========================================
-   5. ANONYMOUS
+/*5. ANONYMOUS
    Bagian Pesan Anonim (Firebase)
-   ========================================= */
+*/
 .anonymous {
   margin: 160px 200px;
   display: flex;
@@ -1621,10 +1726,9 @@ body.dark-mode .admin-delete-btn:hover {
   color: white;
 }
 
-/* =========================================
-   6. CHRISTMAS EFFECTS
+/* 6. CHRISTMAS EFFECTS
    Efek Salju, Pohon, & Popup Natal
-   ========================================= */
+*/
 #christmas-container {
   position: fixed;
   top: 0;
@@ -1876,12 +1980,11 @@ body.dark-mode .xmas-deco {
   }
 }
 
-/* =========================================
-   7. RESPONSIVE DESIGN
+/*7. RESPONSIVE DESIGN
    Media Queries untuk tablet & mobile
-   ========================================= */
+ */
 
-/* --- TABLET / SMALL LAPTOP --- */
+/* TABLET / SMALL LAPTOP */
 @media (max-width: 1024px) {
   .video-container {
     width: 200px;
@@ -1926,7 +2029,7 @@ body.dark-mode .xmas-deco {
   }
 
   .member-card-simple {
-    flex: 0 0 400px;
+    flex: 0 0 300px; /* Ukuran responsif */
   }
 
   .member-photo-container {
@@ -1947,7 +2050,7 @@ body.dark-mode .xmas-deco {
   }
 }
 
-/* --- MOBILE --- */
+/* Mobile */
 @media (max-width: 768px) {
   .video-container {
     width: 180px;
@@ -2022,7 +2125,7 @@ body.dark-mode .xmas-deco {
   }
 
   .member-card-simple {
-    flex: 0 0 350px;
+    flex: 0 0 280px;
   }
 
   .member-photo-container {
@@ -2056,7 +2159,7 @@ body.dark-mode .xmas-deco {
   }
 }
 
-/* --- SMALL MOBILE --- */
+/* SMALL MOBILE */
 @media (max-width: 480px) {
   .video-container {
     width: 160px;
@@ -2097,7 +2200,7 @@ body.dark-mode .xmas-deco {
   }
 
   .member-card-simple {
-    flex: 0 0 300px;
+    flex: 0 0 250px;
   }
 
   .member-photo-container {

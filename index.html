@@ -10,7 +10,7 @@
 
   <title>Sperta Squad - SPREI TACABU SETENGAH</title>
 
-  <link rel="stylesheet" href="style.css?v=1.2">
+  <link rel="stylesheet" href="style.css?v=1.3">
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -52,17 +52,28 @@
   </div>
 
   <div id="image-viewer" class="image-viewer">
-      <div class="viewer-content">
+      <div class="viewer-backdrop"></div> <div class="viewer-content">
           <span class="close-viewer">&times;</span>
+          
           <button class="viewer-nav viewer-prev">
               <i class="fas fa-chevron-left"></i>
           </button>
-          <div class="viewer-image-container">
-              <img id="viewer-image" src="" alt="Team Member">
+          
+          <div class="viewer-image-wrapper">
+              <div class="viewer-decoration deco-tl"></div>
+              <div class="viewer-decoration deco-tr"></div>
+              <div class="viewer-decoration deco-bl"></div>
+              <div class="viewer-decoration deco-br"></div>
+
+              <div class="viewer-image-container">
+                  <img id="viewer-image" src="" alt="Team Member">
+              </div>
           </div>
+
           <button class="viewer-nav viewer-next">
               <i class="fas fa-chevron-right"></i>
           </button>
+          
           <div class="viewer-counter">
               <span id="current-index">1</span> / <span id="total-images">6</span>
           </div>
@@ -292,6 +303,6 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
   
-  <script src="main.js?v=1.1"></script>
+  <script src="main.js?v=1.3"></script>
 </body>
 </html>

@@ -1,16 +1,20 @@
 /**
  * main.js
- * * Update Catatan:
+ * * List Update:
  * - Udah dipindahin key API nya ke config.js biar gak dicolong orang wkwk.
- * - Login admin udah jalan (klik icon perisai).
- * - Load foto tim otomatis, jadi gak usah ngetik HTML satu-satu lagi.
- * - Lirik lagu bisa jalan barengan musik (sync).
- * - UPDATE: Tombol minimize musik udah dibenerin, skrg gak kepotong lagi.
- * - UPDATE (LAGI): Animasinya dibikin smooth pake bezier.
- * - UPDATE (LAGI2): Pas minimize, animasi dibikin antri (konten ilang dulu -> baru kotak kecil).
- * - ADA EFEK NATALNYA JUGA DONG! Salju, Bintang, Pohon.
+ * - Login admin udah jalan (klik icon shield).
+ * - Load foto tim otomatis
+ * - Lyrics lagu bisa jalan barengan musik (sync).
+ * - UPDATE: Tombol minimize musik, skrg gak kepotong lagi.
+ * - UPDATE 1 : Animasinya dibikin smooth pake bezier.
+ * - UPDATE 2 : Pas minimize, animasi dibikin antri (konten ilang dulu -> baru kotak kecil).
+ * - ADD EFEK NATAL : Salju, Bintang, Pohon.
  * - UPDATE BUG FIX: Counter foto team sekarang dinamis & support tombol panah keyboard.
  * - UPDATE FITUR: Lagu sekarang otomatis Loop (muter ulang) sampe user ganti sendiri.
+ * * * [UPDATE TERBARU - DESEMBER 2025]
+ * - Mengembalikan tampilan Team ke Horizontal Scroll.
+ * - Ukuran foto tim di luar tetap 450px.
+ * - Ukuran popup foto diperkecil agar tidak terlalu penuh di layar.
  */
 
 /*
@@ -27,7 +31,7 @@ const musicFiles = [
 
 document.addEventListener('DOMContentLoaded', () => {
   console.log('Web initializing...');
-  // Pake try-catch biar kalau ada error, loading screen dipaksa ilang (Safety Net)
+  // Pake try-catch biar kalau ada error, loading screen dipaksa ilang
   try {
     Site.init();
   } catch (error) {
@@ -43,7 +47,7 @@ const Site = (function() {
   // Ambil elemen audio
   const audio = document.getElementById('background-music');
 
-  // Variabel buat player musik (biar gak ngetik ulang-ulang)
+  // Variabel buat player musik ( biar gk buat ulg")
   const modern = {
     container: document.getElementById('modern-music-player'),
     toggle: document.getElementById('modern-toggle'),
@@ -82,7 +86,7 @@ const Site = (function() {
     return path.split('/').pop().replace(/\.[^/.]+$/, '');
   }
 
-  // Kalo metadata lagu gak ada, pake ginian aja buat default
+  // Kalo metadata lagu gak ada, pake ginian aee buat default
   function metaFromPath(path) {
     const base = baseName(path);
     const title = base.replace(/[-_]/g, ' ');
@@ -107,13 +111,12 @@ const Site = (function() {
       updateTimeUI(0, 0);
       return;
     }
-    // Logic loop playlist (kalo abis balik ke awal)
+    // Logic loop playlist
     currentIndex = ((index % musicFiles.length) + musicFiles.length) % musicFiles.length;
     const path = musicFiles[currentIndex];
     audio.src = path;
     
-    // === FITUR LOOP LAGU ===
-    // Ini bikin lagu muter ulang-ulang terus
+    // pitur loop lagu (on/off)
     audio.loop = true; 
     
     audio.load();
@@ -121,14 +124,14 @@ const Site = (function() {
     // Reset lirik biar bersih
     currentLyrics = [];
     currentLyricIndex = -1;
-    modern.lyrics.textContent = '...';
+    if(modern.lyrics) modern.lyrics.textContent = '...'; // Null check
 
     const base = baseName(path);
     const lyricFilePath = `${base}.json`;
 
     console.log(`Lagi muter: ${path}`);
 
-    // Coba cari file lirik .json
+    // buat nyari file lirik .json
     fetch(lyricFilePath)
       .then(res => {
         if (!res.ok) throw new Error(`File JSON '${lyricFilePath}' gak ketemu.`);
@@ -150,9 +153,9 @@ const Site = (function() {
         }
       })
       .catch(err => {
-        // Kalo error atau gak ada lirik, yaudah pake default
+        // Kalo error/gak ada lirik, otomatis pke defaultnya
         currentLyrics = [];
-        modern.lyrics.textContent = 'Lirik tidak tersedia.';
+        if(modern.lyrics) modern.lyrics.textContent = 'Lirik tidak tersedia.';
         const meta = metaFromPath(path);
         renderMeta(meta);
       });
@@ -196,14 +199,15 @@ const Site = (function() {
   }
 
   function renderMeta(meta) {
-    if (!modern) return;
+    // Null check biar gak error kalo elemen HTML ilang
+    if (!modern.title || !modern.artist || !modern.album) return;
     modern.title.textContent = meta.title || 'Unknown';
     modern.artist.textContent = meta.artist || '';
     modern.album.src = meta.img || 'images/elaina.jpg';
   }
 
   function updateTimeUI(current, total) {
-    if (!modern) return;
+    if (!modern.currentTime || !modern.totalTime || !modern.progressBar) return;
     modern.currentTime.textContent = fmt(current);
     modern.totalTime.textContent = fmt(total);
     const pct = total ? (current / total) * 100 : 0;
@@ -254,9 +258,9 @@ const Site = (function() {
     rafId = null;
   }
 
-  // Logic Lirik Karaoke
+  // Logik lyrics
   function updateLyrics(time) {
-    if (!currentLyrics || currentLyrics.length === 0) return;
+    if (!currentLyrics || currentLyrics.length === 0 || !modern.lyrics) return;
     let newLyricIndex = -1;
     let currentLyricText = null;
     for (let i = 0; i < currentLyrics.length; i++) {
@@ -277,9 +281,9 @@ const Site = (function() {
     }
   }
 
-  // Sambungin fungsi JS ke tombol HTML
+  // penyammbung fungsi js ke html
   function attachModernUI() {
-    if (!modern) return;
+    if (!modern.container) return;
 
     if (modern.playBtn) modern.playBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -304,7 +308,7 @@ const Site = (function() {
     if (modern.album) {
       modern.album.onerror = function() {
         if (!this.src.endsWith('elaina.jpg')) {
-          this.src = 'images/elaina.jpg'; // Gambar cadangan kalo error
+          this.src = 'images/elaina.jpg'; // gmbar defaultnya
         }
       };
     }
@@ -334,6 +338,7 @@ const Site = (function() {
   }
 
   // Fitur liat foto zoom (IMAGE VIEWER - FIXED)
+  // biar Sinkron dengan struktur viewer-content di index.html
   function initImageViewer() {
     const viewer = document.getElementById('image-viewer');
     const viewerImage = document.getElementById('viewer-image');
@@ -355,6 +360,7 @@ const Site = (function() {
     }
 
     document.querySelectorAll('.member-photo-simple').forEach((img, idx) => {
+      // Clone node untuk membersihkan event listener lama 
       const newImg = img.cloneNode(true);
       img.parentNode.replaceChild(newImg, img);
 
@@ -376,7 +382,7 @@ const Site = (function() {
 
     if (closeBtn) closeBtn.addEventListener('click', closeViewer);
     viewer.addEventListener('click', (e) => {
-      if (e.target === viewer) {
+      if (e.target === viewer || e.target.classList.contains('viewer-backdrop')) {
         closeViewer();
       }
     });
@@ -385,6 +391,7 @@ const Site = (function() {
     const nextBtn = document.querySelector('.viewer-next');
 
     function updateViewer(i) {
+      if(imgs.length === 0) return;
       currentViewerIndex = (i + imgs.length) % imgs.length;
       viewerImage.src = imgs[currentViewerIndex].src;
       viewerImage.alt = imgs[currentViewerIndex].alt;
@@ -426,11 +433,13 @@ const Site = (function() {
     scrollContainer.innerHTML = '';
     let photoCount = 0;
 
+    // [UPDATE] Kembali ke logika Horizontal Scroll yang simple
     function checkAndAddImage(index) {
       const imgPath = `images/team${index}.jpg`;
       const img = new Image();
       img.onload = function() {
         photoCount++;
+        // HTML Structure ini harus sama persis dengan CSS .member-card-simple
         const cardHTML = `
           <div class="member-card-simple">
             <div class="member-photo-container">
@@ -443,6 +452,7 @@ const Site = (function() {
       };
       img.onerror = function() {
         // Stop kalo gambar udah gak ketemu, baru jalankan viewer
+        // Agar listener click baru dipasang SETELAH gmbar dimuat
         initImageViewer();
       };
       img.src = imgPath;
@@ -450,16 +460,90 @@ const Site = (function() {
     checkAndAddImage(1);
   }
 
+  // Navigasi Smooth Scroll & Tombol Back to Top
+  function initNavAndBackToTop() {
+    const navLinks = document.querySelectorAll('.ul-list li a');
+    const sections = document.querySelectorAll('section');
+
+    function removeActive() {
+      navLinks.forEach(link => link.parentElement.classList.remove('active'));
+    }
+    navLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const id = link.getAttribute('href').substring(1);
+        const sec = document.getElementById(id);
+        if (!sec) return;
+        window.scrollTo({
+          top: sec.offsetTop - 80,
+          behavior: 'smooth'
+        });
+        removeActive();
+        link.parentElement.classList.add('active');
+      });
+    });
+    window.addEventListener('scroll', () => {
+      let scrollPos = window.scrollY + 100;
+      sections.forEach(section => {
+        if (scrollPos >= section.offsetTop && scrollPos < section.offsetTop + section.offsetHeight) {
+          removeActive();
+          const activeLink = document.querySelector(`.ul-list li a[href="#${section.id}"]`);
+          if (activeLink) activeLink.parentElement.classList.add('active');
+        }
+      });
+    });
+    let backToTop = document.getElementById('back-to-top');
+    if (!backToTop) {
+      backToTop = document.createElement('div');
+      backToTop.id = 'back-to-top';
+      backToTop.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
+      document.body.appendChild(backToTop);
+      backToTop.addEventListener('click', () => window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      }));
+    }
+    window.addEventListener('scroll', () => {
+      if(backToTop) backToTop.style.display = window.scrollY > 500 ? 'flex' : 'none';
+    });
+  }
+
+  // Animasi pas scroll
+  function initRevealObserver() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('active-reveal');
+      });
+    }, {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  }
+
+  // Scroll Tim Horizontal
+  function initTeamScroll() {
+    const teamScrollWrapper = document.querySelector('.team-scroll-wrapper');
+    if (teamScrollWrapper) {
+      teamScrollWrapper.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        teamScrollWrapper.scrollLeft += e.deltaY;
+      });
+    }
+  }
+
   // Logic Pesan Anonim (Firebase)
   function initAnonymousFeature() {
+    // Cek library Firebase
     if (typeof firebase === 'undefined' || typeof firebase.firestore === 'undefined' || typeof firebase.auth === 'undefined') {
       const listElement = document.getElementById('anon-messages-list');
       if (listElement) listElement.innerHTML = '<div class="anon-message-loading">Firebase SDK missing gan.</div>';
       return;
     }
+    // Cek Configuratioon ( config.js )
     if (typeof firebaseConfig === 'undefined') {
       const listElement = document.getElementById('anon-messages-list');
-      if (listElement) listElement.innerHTML = '<div class="anon-message-loading">Config.js belom dibikin.</div>';
+      if (listElement) listElement.innerHTML = '<div class="anon-message-loading">Config.js belom dibikin/diload.</div>';
       return;
     }
 
@@ -470,6 +554,7 @@ const Site = (function() {
       const auth = firebase.auth();
       const messagesCollection = db.collection('pesan_anonim');
 
+      // [HTML CHECK] ID Element sesuai form di index.html
       const messageInput = document.getElementById('anon-message-input');
       const submitButton = document.getElementById('anon-submit-btn');
       const charCounter = document.getElementById('anon-char-counter');
@@ -558,7 +643,7 @@ const Site = (function() {
                 dateStyle: 'medium',
                 timeStyle: 'short'
               }) : 'Baru saja';
-              const safeText = data.text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+              const safeText = data.text ? data.text.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
               const adminButtonHTML = isAdmin ? `<button class="admin-delete-btn" data-id="${messageId}" title="Hapus"><i class="fa-solid fa-trash-can"></i></button>` : '';
               messageCard.innerHTML = `${adminButtonHTML}<p>${safeText}</p><span>${date}</span>`;
               messagesList.appendChild(messageCard);
@@ -631,79 +716,7 @@ const Site = (function() {
     });
   }
 
-  // Navigasi Smooth Scroll & Tombol Back to Top
-  function initNavAndBackToTop() {
-    const navLinks = document.querySelectorAll('.ul-list li a');
-    const sections = document.querySelectorAll('section');
-
-    function removeActive() {
-      navLinks.forEach(link => link.parentElement.classList.remove('active'));
-    }
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const id = link.getAttribute('href').substring(1);
-        const sec = document.getElementById(id);
-        if (!sec) return;
-        window.scrollTo({
-          top: sec.offsetTop - 80,
-          behavior: 'smooth'
-        });
-        removeActive();
-        link.parentElement.classList.add('active');
-      });
-    });
-    window.addEventListener('scroll', () => {
-      let scrollPos = window.scrollY + 100;
-      sections.forEach(section => {
-        if (scrollPos >= section.offsetTop && scrollPos < section.offsetTop + section.offsetHeight) {
-          removeActive();
-          const activeLink = document.querySelector(`.ul-list li a[href="#${section.id}"]`);
-          if (activeLink) activeLink.parentElement.classList.add('active');
-        }
-      });
-    });
-    let backToTop = document.getElementById('back-to-top');
-    if (!backToTop) {
-      backToTop = document.createElement('div');
-      backToTop.id = 'back-to-top';
-      backToTop.innerHTML = '<i class="fa-solid fa-chevron-up"></i>';
-      document.body.appendChild(backToTop);
-      backToTop.addEventListener('click', () => window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      }));
-    }
-    window.addEventListener('scroll', () => {
-      backToTop.style.display = window.scrollY > 500 ? 'flex' : 'none';
-    });
-  }
-
-  // Animasi pas scroll
-  function initRevealObserver() {
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('active-reveal');
-      });
-    }, {
-      threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
-    });
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-  }
-
-  // Scroll Tim Horizontal
-  function initTeamScroll() {
-    const teamScrollWrapper = document.querySelector('.team-scroll-wrapper');
-    if (teamScrollWrapper) {
-      teamScrollWrapper.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        teamScrollWrapper.scrollLeft += e.deltaY;
-      });
-    }
-  }
-
-  // Ganti Tema (Terang/Gelap)
+  // Ganti Tema (Dark/White)
   function updateThemeIcon(isDark) {
     const themeToggle = document.querySelector('.theme-toggle');
     if (!themeToggle) return;
@@ -778,7 +791,7 @@ const Site = (function() {
       setTimeout(hideLoadingSequence, 3200);
     }
 
-    // FAILSAFE: Jika dalam 4 detik masih loading (karena bug atau internet lambat), paksa hilang
+    // seandainya dalam 4 detik masih loading (karena bug atau internet lambat), paksa hilang
     setTimeout(() => {
         if (loadingScreen && loadingScreen.style.display !== 'none') {
             console.warn("Loading screen timeout forced.");
@@ -832,7 +845,7 @@ const Site = (function() {
     }
   }
 
-  // EFEK NATAL (POPUP & EFEK - STARS RESTORED!)
+  // EFEK NATAL (POPUP & EFEK)
   function initChristmasMagic() {
     const container = document.getElementById('christmas-container');
     if (!container) return;
@@ -849,12 +862,14 @@ const Site = (function() {
       container.appendChild(snowflake);
     }
 
-    // Bikin bintang kedip-kedip (INI YANG TADI HILANG, UDAH BALIK YA!)
+    // Bikin bintang kedip-kedip
     for (let i = 0; i < 12; i++) {
       const star = document.createElement('div');
       star.classList.add('christmas-star');
       star.innerHTML = '<i class="fas fa-star"></i>';
       container.appendChild(star);
+      
+      // Interval untuk efek muncul/hilang bintang
       setInterval(() => {
         star.style.left = Math.random() * 100 + 'vw';
         star.style.top = Math.random() * 100 + 'vh';
@@ -882,7 +897,7 @@ const Site = (function() {
     tree.addEventListener('click', (e) => {
       e.stopPropagation();
       if (popupOverlay) {
-        popupOverlay.classList.add('active');
+        popupOverlay.classList.add('active'); // CSS handling display
         document.body.style.overflow = 'hidden';
       }
     });
@@ -893,7 +908,7 @@ const Site = (function() {
   }
 
   function init() {
-    // Jalankan semua fungsi
+    // Jalanin semua fungsi
     try {
         attachModernUI();
         loadTrack(0);
@@ -907,7 +922,7 @@ const Site = (function() {
         initLoadingAndTyping();
         initChristmasMagic();
         
-        // Hack biar autoplay jalan saat user pertama kali interaksi
+        // biar autoplay jalan saat user pertama kali interaksi
         document.addEventListener('click', function first() {
           if (audio && audio.src && !isPlaying) {
             audio.play().then(() => audio.pause()).catch(() => {});
@@ -919,7 +934,7 @@ const Site = (function() {
         });
     } catch(e) {
         console.error("Error di fungsi init utama:", e);
-        // Pastikan loading screen hilang kalau ada error di sini
+        // pastiin loading screen hilang kalau ada error di sini
         const loader = document.getElementById('loading-screen');
         if (loader) loader.style.display = 'none';
         document.body.style.overflow = '';
