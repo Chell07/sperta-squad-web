@@ -1,9 +1,8 @@
-# .gitignore
-
-# Abaikan file konfigurasi
+# chc
 config.js
+.vscode/
 
-# Folder cache dan log Firebase
+# log
 .firebase/
 y/
 n/
